@@ -16,11 +16,11 @@ outletType_name_mapping =  {'Grocery Store': 0,'Supermarket Type1': 1,
 
 def preprocess(json_data):
     MEAN_VISI = 0.07074283408443931
-    mrp = json_data['mrp']
+    mrp = float(json_data['mrp'])
     outlet_type = json_data['outlet_type']
     outlet = json_data['outlet']
-    esta_years = json_data['esta_years']
-    visi = json_data['visi']
+    esta_years = int(json_data['esta_years'])
+    visi = float(json_data['visi'])
     
     if mrp <=69: 
         mrp = 'a'

@@ -1,13 +1,13 @@
 import pickle
 import json
-from flask import Flask
-from flask import request
+from flask import Flask,request,render_template
+from flask import jsonify, make_response
 from preprocess import preprocess
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/',methods = ['GET'])
 def home():
-    return 'This is a Flask API'
+    return render_template('index.html')
 
 @app.route('/predict' , methods = ['POST'])
 def predict():
@@ -19,7 +19,14 @@ def predict():
         model = pickle.load(file)
     prediction = model.predict(df)
 
-    return json.dumps(prediction[0])
+    json_data = { 
+        "prediction" : prediction[0]
+    }
+
+    print(json_data)
+    res = make_response(jsonify(json_data), 200)
+
+    return res
 
 if __name__ == "__main__":
     app.run(debug=True, port=9000)
