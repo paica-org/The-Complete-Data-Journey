@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 
-
 mrp_name_mapping = {'a': 0, 'b': 1, 'c': 2, 'd': 3}
 
 outlet_name_mapping = {'OUT010': 0, 'OUT013': 1,'OUT017': 2,
