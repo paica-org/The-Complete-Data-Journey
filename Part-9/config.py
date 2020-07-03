@@ -1,5 +1,5 @@
 import os
 
-ACCESS_KEY =  'AKIATLEM5VP2W6CHMVGC' 
-SECRET_KEY = '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'
+ACCESS_KEY =  'access-key' 
+SECRET_KEY = 'secret-key'
 S3_LOCATION = 'http://{}.s3.amazonaws.com/'.format('graph_sales')

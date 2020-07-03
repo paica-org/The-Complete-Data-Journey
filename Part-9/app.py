@@ -18,7 +18,7 @@ from preprocess import preprocess
 ########################################################
 #                      CONFIG                          #
 ########################################################
-engine = create_engine("postgresql://postgres:Prince@99@localhost:5432/Sales")
+engine = create_engine("postgresql://username:password@localhost:5432/db")
 db = scoped_session(sessionmaker(bind=engine))
 
 app = Flask(__name__)
@@ -30,7 +30,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 
 #Setting AWS S3
-bucket_name = "graph-sales"
+bucket_name = "bucket-name"
 
 s3 = boto3.resource(
    "s3",
