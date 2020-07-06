@@ -54,43 +54,43 @@ def home():
     ##################################
     print("Started plot 1")
     tag = 'sales-outletType-years'
-
     try:
+        #Getting URL from Database
         result = db.execute("SELECT url from graphs where tag = :tag",
           { "tag" : tag})
-
         db.commit()
         for r in result:
             full_url = r[0]
-
         delete_image = full_url.split('/')[::-1][0]
         print("Deleting")
+        #Deleting the image from S3 Bucket
         s3.Object(bucket_name, delete_image).delete()
     except Exception as err:
         print(err)
-
+    #making new plot
     fig, axes = plt.subplots(2,1,figsize=(10,10))
-
     out_type = df.groupby(["outlet_type"]).sales.sum().reset_index()
     axes[0].bar(out_type.outlet_type,out_type.sales,color="orange")
     axes[0].set_xlabel("Outlet_Type",fontsize=15)
     axes[0].set_ylabel("Mean Sales",fontsize=15)
-
     establish = df.groupby(["esta_years"]).sales.mean().reset_index()
     axes[1].bar(establish.esta_years,establish.sales,color="black")
     axes[1].set_xlabel("Outlet_Establishment_Year",fontsize=15)
     axes[1].set_ylabel("Mean Sales",fontsize=15)
     id = uuid.uuid4()
+    #giving a randome unique name to the image
     image_name = str(id)+".png"
     plt.savefig("static/graphs/" + image_name)
+    #Pushing the new image to the s3 Bucket
     with open("static/graphs/" + image_name, "rb") as img_data:
         s3.Bucket(bucket_name).put_object(Key=image_name, 
                                     Body=img_data, 
                                     ContentType="image/png", 
                                     ACL="public-read")
-
+    #URL of the new PLOT
     plot_one_url = "http://" + bucket_name + ".s3.amazonaws.com/" + image_name
     try:
+        #Updating the Database with new URL
         db.execute("UPDATE graphs SET url = :url where tag = :tag",
                     {"url": plot_one_url, "tag": tag})
         db.commit()
@@ -193,9 +193,7 @@ def home():
 
 @app.route('/predict' , methods = ['POST'])
 def predict():
-
     data = request.get_json(force=True)
-    print(data)
 
     mrp = float(data['mrp'])
     outlet_type = data['outlet_type']
@@ -207,25 +205,25 @@ def predict():
     with open('./models/RandomForestModel.pickle','rb') as file:
         model = pickle.load(file)
     prediction = model.predict(df)
-
     try:
         print("Inserting into Sales Table............")
-        db.execute( "INSERT INTO sales (outlet,outlet_type,mrp,esta_years,visi,sales) VALUES (:outlet,:outlet_type,:mrp,:esta_years,:visi,:sales)",
-                        {"outlet": outlet, "outlet_type": outlet_type, "mrp":mrp, "esta_years":esta_years, "visi": visi, "sales":prediction[0]}
+        db.execute( "INSERT INTO sales (outlet,outlet_type,mrp,esta_years,visi,sales) VALUES \
+                        (:outlet,:outlet_type,:mrp,:esta_years,:visi,:sales)",
+                        {
+                            "outlet": outlet, "outlet_type": outlet_type, "mrp":mrp, 
+                            "esta_years":esta_years, "visi": visi, "sales":prediction[0]
+                        }
                     ) 
         db.commit()
         print("Done inserting into Sales Table............")
     except:
         print("Error in inserting..........")
-
-
     json_data = { 
         "prediction" : prediction[0]
     }
 
     print(json_data)
     res = make_response(jsonify(json_data), 200)
-
     return res
 
 
